@@ -31,22 +31,36 @@ class Expression():
                 return r
         return ""
 
+
+    def get_next_right_par_index(self):
+        return self.s.find(")", self.index)
+
     def convert_expression(self):
         operation_stack = []
         number_stack = []
         next_v = self.get_next()
         while next_v != "":
             if next_v in self.operators:
-                if len(operation_stack) > 0:
+                if next_v == "(":
+                    left_par_index = self.index - 1
+                    right_par_index = self.get_next_right_par_index()
+                    self.index = right_par_index + 1
+
+                    in_par_s = self.s[left_par_index + 1:right_par_index]
+                    last_t = Expression(in_par_s)
+
+                    number_stack.append(last_t.convert_expression())
+
+                elif len(operation_stack) > 0:
                     pre_op = operation_stack.pop()
                     if next_v == "+" or next_v == "-" or ((next_v == "*" or next_v == "/" ) and ( pre_op == "*" or pre_op == "/")):
                         num_right = number_stack.pop()
                         num_left = number_stack.pop()
-                        if num_right.__class__.__name__ == Expression.__name__:
+                        if num_right.__class__.__name__ == ExpressionTree.__name__:
                             num_right_tree = num_right
                         else:
                             num_right_tree = ExpressionTree(num_right)
-                        if num_left.__class__.__name__ == Expression.__name__:
+                        if num_left.__class__.__name__ == ExpressionTree.__name__:
                             num_left_tree = num_left
                         else:
                             num_left_tree = ExpressionTree(num_left)
@@ -72,11 +86,11 @@ class Expression():
             last_op = operation_stack.pop()
             num_right = number_stack.pop()
             num_left = number_stack.pop()
-            if num_right.__class__.__name__ == Expression.__name__:
+            if num_right.__class__.__name__ == ExpressionTree.__name__:
                 num_right_tree = num_right
             else:
                 num_right_tree = ExpressionTree(num_right)
-            if num_left.__class__.__name__ == Expression.__name__:
+            if num_left.__class__.__name__ == ExpressionTree.__name__:
                 num_left_tree = num_left
             else:
                 num_left_tree = ExpressionTree(num_left)
@@ -144,6 +158,6 @@ class ExpressionTree():
             if self.op == "/":
                 return self.left_tree.evaluate() / self.right_tree.evaluate()
 if __name__ == '__main__':
-    e = Expression("1-2*3")
+    e = Expression("2*(2-4+3)")
     t = e.convert_expression()
     print t.evaluate()
